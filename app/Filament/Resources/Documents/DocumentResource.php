@@ -79,11 +79,10 @@ class DocumentResource extends Resource
                 Select::make('subject_id')
                     ->label('Predmet')
                     ->options(
-                        fn (Get $get): array => Subject::query()
-                            ->when(
-                                $get('school_type_id'),
-                                fn ($query, $schoolTypeId) => $query->forSchoolType((int) $schoolTypeId),
-                            )
+                        fn (Get $get): array => Subject::when(
+                            $get('school_type_id'),
+                            fn ($query, $schoolTypeId) => $query->forSchoolType((int) $schoolTypeId),
+                        )
                             ->orderBy('name')
                             ->pluck('name', 'id')
                             ->all(),

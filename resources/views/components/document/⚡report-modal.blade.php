@@ -3,6 +3,8 @@
 use App\Models\Document;
 use App\Models\Report;
 use App\Models\ReportReason;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 new class extends Component
@@ -23,6 +25,12 @@ new class extends Component
         $this->context = $context;
     }
 
+    #[Computed]
+    public function reportReasons(): Collection
+    {
+        return ReportReason::orderBy('sort_order')->get();
+    }
+
     public function submit(): void
     {
         $user = auth()->user();
@@ -36,7 +44,7 @@ new class extends Component
             'message' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        Report::query()->create([
+        Report::create([
             'document_id' => $this->document->id,
             'user_id' => $user->id,
             'report_reason_id' => $this->reportReasonId,
@@ -92,7 +100,7 @@ new class extends Component
                 <flux:field>
                     <flux:label>Razlog prijave</flux:label>
                     <flux:select wire:model="reportReasonId" placeholder="Izberite razlog...">
-                        @foreach(ReportReason::query()->orderBy('sort_order')->get() as $reason)
+                        @foreach($this->reportReasons as $reason)
                             <flux:select.option :value="$reason->id">{{ $reason->name }}</flux:select.option>
                         @endforeach
                     </flux:select>

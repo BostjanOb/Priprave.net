@@ -16,8 +16,7 @@ class IndexController extends Controller
         $downloadCount = (int) Document::sum('downloads_count');
         $averageRating = round((float) Document::avg('rating_avg'), 2);
 
-        $schoolTypes = SchoolType::query()
-            ->withCount('documents')
+        $schoolTypes = SchoolType::withCount('documents')
             ->orderBy('sort_order')
             ->get();
 

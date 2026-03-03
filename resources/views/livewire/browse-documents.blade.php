@@ -117,7 +117,7 @@
 
                 @foreach($selectedCategories as $selCat)
                     @php $catStyle = $categoryTypeStyles[$selCat->slug] ?? $categoryTypeStyles['priprava']; @endphp
-                    <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold {{ $catStyle['badge'] }}">
+                    <span wire:key="selected-cat-{{ $selCat->id }}" class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold {{ $catStyle['badge'] }}">
                         {{ $selCat->name }}
                         <button wire:click="toggleCategory({{ $selCat->id }})" class="ml-0.5 hover:opacity-70">
                             <x-icon-regular.x class="size-3" />
@@ -207,7 +207,7 @@
                 {{-- Results list --}}
                 <div class="space-y-2" wire:loading.class="opacity-50">
                     @forelse($documents as $document)
-                        <x-document-row :document="$document" />
+                        <x-document-row :document="$document" wire:key="document-{{ $document->id }}" />
                     @empty
                         <div class="rounded-2xl border-2 border-dashed border-muted bg-background py-16 text-center">
                             <x-icon-regular.file-lines class="mx-auto size-10 text-muted-foreground/40" />
