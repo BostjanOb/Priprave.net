@@ -30,7 +30,6 @@ it('returns required config keys for each school type', function () {
         'active',
         'checkBg',
         'checkBorder',
-        'iconSvg',
     ];
 
     $requiredCardKeys = [
@@ -98,7 +97,6 @@ it('provides non empty style values used by filters create and cards', function 
             $typeConfig['create']['active'],
             $typeConfig['create']['checkBg'],
             $typeConfig['create']['checkBorder'],
-            $typeConfig['create']['iconSvg'],
             $typeConfig['card']['title'],
             $typeConfig['card']['description'],
             $typeConfig['card']['gradient'],

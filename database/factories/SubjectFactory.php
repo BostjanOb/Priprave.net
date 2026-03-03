@@ -14,15 +14,22 @@ class SubjectFactory extends Factory
     public function definition(): array
     {
         return [
+            'school_type_id' => SchoolType::factory(),
             'name' => fake()->unique()->word(),
         ];
     }
 
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Subject $subject): void {
+            $subject->schoolTypes()->syncWithoutDetaching([(int) $subject->school_type_id]);
+        });
+    }
+
     public function forSchoolType(SchoolType|int $schoolType): static
     {
-        return $this->afterCreating(function (Subject $subject) use ($schoolType): void {
-            $schoolTypeId = $schoolType instanceof SchoolType ? $schoolType->id : $schoolType;
-            $subject->schoolTypes()->syncWithoutDetaching([(int) $schoolTypeId]);
-        });
+        return $this->state(fn (): array => [
+            'school_type_id' => $schoolType instanceof SchoolType ? $schoolType->id : $schoolType,
+        ]);
     }
 }

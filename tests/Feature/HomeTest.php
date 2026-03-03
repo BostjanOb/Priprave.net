@@ -54,7 +54,7 @@ it('displays the upload CTA section', function () {
     SchoolType::factory()->count(3)->create();
 
     $this->get(route('home'))
-        ->assertSee('Deli jo s kolegi!');
+        ->assertSee('Deli ga s kolegi!');
 });
 
 it('displays the stats section', function () {

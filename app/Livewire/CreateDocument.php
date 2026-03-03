@@ -172,7 +172,10 @@ class CreateDocument extends Component
         ]);
 
         $subject = Subject::firstOrCreate(
-            ['name' => trim($this->subjectSearch)],
+            [
+                'name' => trim($this->subjectSearch),
+                'school_type_id' => (int) $this->schoolTypeId,
+            ],
         );
         $subject->schoolTypes()->syncWithoutDetaching([(int) $this->schoolTypeId]);
 
