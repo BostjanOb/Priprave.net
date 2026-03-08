@@ -9,7 +9,9 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Filament\Tables\Table;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -21,6 +23,15 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        Table::configureUsing(
+            fn (Table $table) => $table->defaultDateTimeDisplayFormat('j. M. Y H:i:s')
+                ->paginated([50, 100, 200])
+        );
+
+        Schema::configureUsing(
+            fn (Schema $schema) => $schema->defaultDateTimeDisplayFormat('j. M. Y H:i:s')
+        );
+
         return $panel
             ->default()
             ->id('admin')

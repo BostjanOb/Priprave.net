@@ -33,6 +33,9 @@ class Subject extends Model
     #[Scope]
     protected function forSchoolType(Builder $query, int $schoolTypeId): Builder
     {
-        return $query->where('school_type_id', $schoolTypeId);
+        return $query->whereHas(
+            'schoolTypes',
+            fn (Builder $schoolTypesQuery): Builder => $schoolTypesQuery->whereKey($schoolTypeId),
+        );
     }
 }

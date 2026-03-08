@@ -2,7 +2,13 @@
 
 namespace App\Filament\Resources\Documents;
 
-use App\Filament\Resources\Documents\Pages\ManageDocuments;
+use App\Filament\Resources\Documents\Pages\CreateDocument;
+use App\Filament\Resources\Documents\Pages\EditDocument;
+use App\Filament\Resources\Documents\Pages\ListDocuments;
+use App\Filament\Resources\Documents\Pages\ManageDocumentComments;
+use App\Filament\Resources\Documents\Pages\ManageDocumentDownloads;
+use App\Filament\Resources\Documents\Pages\ManageDocumentRatings;
+use App\Filament\Resources\Documents\Pages\ViewDocument;
 use App\Models\Document;
 use App\Models\Subject;
 use BackedEnum;
@@ -14,10 +20,15 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -43,7 +54,9 @@ class DocumentResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Gradiva';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 
     public static function form(Schema $schema): Schema
     {
@@ -114,6 +127,54 @@ class DocumentResource extends Resource
             ]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Osnovni podatki')
+                    ->schema([
+                        TextEntry::make('title')
+                            ->label('Naslov'),
+                        TextEntry::make('slug')
+                            ->label('Slug'),
+                        TextEntry::make('user.display_name')
+                            ->label('Avtor'),
+                        TextEntry::make('category.name')
+                            ->label('Kategorija'),
+                        TextEntry::make('schoolType.name')
+                            ->label('Tip šole'),
+                        TextEntry::make('grade.name')
+                            ->label('Razred'),
+                        TextEntry::make('subject.name')
+                            ->label('Predmet'),
+                        TextEntry::make('downloads_count')
+                            ->label('Prenosi'),
+                        TextEntry::make('views_count')
+                            ->label('Ogledi'),
+                        TextEntry::make('rating_count')
+                            ->label('Število ocen'),
+                        TextEntry::make('rating_avg')
+                            ->label('Povprečna ocena'),
+                        TextEntry::make('created_at')
+                            ->label('Ustvarjeno')
+                            ->dateTime('d.m.Y H:i'),
+                        TextEntry::make('updated_at')
+                            ->label('Posodobljeno')
+                            ->dateTime('d.m.Y H:i'),
+                    ]),
+                Section::make('Vsebina')
+                    ->schema([
+                        TextEntry::make('description')
+                            ->label('Opis')
+                            ->columnSpanFull(),
+                        TextEntry::make('topic')
+                            ->label('Tema'),
+                        TextEntry::make('keywords')
+                            ->label('Ključne besede'),
+                    ]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -149,6 +210,7 @@ class DocumentResource extends Resource
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
@@ -160,13 +222,36 @@ class DocumentResource extends Resource
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->recordUrl(fn (Document $record): string => static::getUrl('view', ['record' => $record]));
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewDocument::class,
+            EditDocument::class,
+            ManageDocumentDownloads::class,
+            ManageDocumentComments::class,
+            ManageDocumentRatings::class,
+        ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ManageDocuments::route('/'),
+            'index' => ListDocuments::route('/'),
+            'create' => CreateDocument::route('/create'),
+            'view' => ViewDocument::route('/{record}'),
+            'edit' => EditDocument::route('/{record}/edit'),
+            'downloads' => ManageDocumentDownloads::route('/{record}/downloads'),
+            'comments' => ManageDocumentComments::route('/{record}/comments'),
+            'ratings' => ManageDocumentRatings::route('/{record}/ratings'),
         ];
     }
 

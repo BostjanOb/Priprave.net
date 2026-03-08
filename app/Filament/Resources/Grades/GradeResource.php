@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -48,11 +49,6 @@ class GradeResource extends Resource
                     ->label('Naziv')
                     ->required()
                     ->maxLength(255),
-                TextInput::make('sort_order')
-                    ->label('Vrstni red')
-                    ->numeric()
-                    ->minValue(0)
-                    ->required(),
             ]);
     }
 
@@ -60,9 +56,6 @@ class GradeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label('Vrstni red')
-                    ->sortable(),
                 TextColumn::make('schoolType.name')
                     ->label('Tip šole')
                     ->searchable()
@@ -74,7 +67,10 @@ class GradeResource extends Resource
             ])
             ->defaultSort('sort_order')
             ->filters([
-                //
+                SelectFilter::make('school_type_id')
+                    ->label('Tip šole')
+                    ->relationship('schoolType', 'name')
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

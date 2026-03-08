@@ -32,7 +32,7 @@ class CommentResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Gradiva';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
@@ -74,16 +74,14 @@ class CommentResource extends Resource
                 TextColumn::make('text')
                     ->label('Komentar')
                     ->searchable()
-                    ->limit(60),
+                    ->wrap()
+                    ->lineClamp(3),
                 TextColumn::make('created_at')
                     ->label('Ustvarjen')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

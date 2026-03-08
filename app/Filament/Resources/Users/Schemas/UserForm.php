@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Schemas;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Password;
 
@@ -36,26 +37,33 @@ class UserForm
                     ])
                     ->required()
                     ->native(false),
+                // TODO: change to file upload
                 TextInput::make('avatar_path')
                     ->label('Pot do avatarja')
                     ->maxLength(255),
+                // TODO: move to infolist button
                 DateTimePicker::make('email_verified_at')
                     ->label('E-pošta potrjena')
                     ->seconds(false),
-                TextInput::make('password')
-                    ->label('Geslo')
-                    ->password()
-                    ->revealable()
-                    ->required(fn (string $operation): bool => $operation === 'create')
-                    ->rule(Password::defaults())
-                    ->confirmed()
-                    ->dehydrated(fn (?string $state): bool => filled($state)),
-                TextInput::make('password_confirmation')
-                    ->label('Potrdi geslo')
-                    ->password()
-                    ->revealable()
-                    ->required(fn (string $operation): bool => $operation === 'create')
-                    ->dehydrated(false),
+                Fieldset::make('Sprememba gesla')
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('password')
+                            ->label('Geslo')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->rule(Password::defaults())
+                            ->confirmed()
+                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                        TextInput::make('password_confirmation')
+                            ->label('Potrdi geslo')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(false),
+                    ]),
+
             ]);
     }
 }

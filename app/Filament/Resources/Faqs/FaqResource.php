@@ -23,7 +23,7 @@ class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
 
     protected static ?string $modelLabel = 'FAQ';
 
@@ -56,11 +56,6 @@ class FaqResource extends Resource
                     ->options(Faq::iconBackgroundColorOptions())
                     ->required()
                     ->native(false),
-                TextInput::make('sort_order')
-                    ->label('Vrstni red')
-                    ->numeric()
-                    ->minValue(0)
-                    ->required(),
             ]);
     }
 
@@ -68,9 +63,6 @@ class FaqResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label('Vrstni red')
-                    ->sortable(),
                 TextColumn::make('question')
                     ->label('Vprašanje')
                     ->searchable()

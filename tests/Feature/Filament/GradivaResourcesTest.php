@@ -2,12 +2,20 @@
 
 use App\Enums\ReportStatus;
 use App\Filament\Resources\Comments\Pages\ManageComments;
-use App\Filament\Resources\Documents\Pages\ManageDocuments;
+use App\Filament\Resources\Documents\Pages\CreateDocument;
+use App\Filament\Resources\Documents\Pages\EditDocument;
+use App\Filament\Resources\Documents\Pages\ListDocuments;
+use App\Filament\Resources\Documents\Pages\ManageDocumentComments;
+use App\Filament\Resources\Documents\Pages\ManageDocumentDownloads;
+use App\Filament\Resources\Documents\Pages\ManageDocumentRatings;
+use App\Filament\Resources\Documents\Pages\ViewDocument;
 use App\Filament\Resources\Reports\Pages\ManageReports;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Document;
+use App\Models\DownloadRecord;
 use App\Models\Grade;
+use App\Models\Rating;
 use App\Models\Report;
 use App\Models\ReportReason;
 use App\Models\SchoolType;
@@ -34,9 +42,24 @@ it('loads gradiva resource pages', function () {
         ->assertOk()
         ->assertCanSeeTableRecords([$comment]);
 
-    Livewire::test(ManageDocuments::class)
+    Livewire::test(ListDocuments::class)
         ->assertOk()
         ->assertCanSeeTableRecords([$document]);
+
+    Livewire::test(EditDocument::class, ['record' => $document->getRouteKey()])
+        ->assertOk();
+
+    Livewire::test(ViewDocument::class, ['record' => $document->getRouteKey()])
+        ->assertOk();
+
+    Livewire::test(ManageDocumentDownloads::class, ['record' => $document->getRouteKey()])
+        ->assertOk();
+
+    Livewire::test(ManageDocumentComments::class, ['record' => $document->getRouteKey()])
+        ->assertOk();
+
+    Livewire::test(ManageDocumentRatings::class, ['record' => $document->getRouteKey()])
+        ->assertOk();
 
     Livewire::test(ManageReports::class)
         ->assertOk()
@@ -75,8 +98,8 @@ it('creates and updates a document', function () {
     $grade = Grade::factory()->create(['school_type_id' => $schoolType->id]);
     $subject = Subject::factory()->forSchoolType($schoolType)->create();
 
-    Livewire::test(ManageDocuments::class)
-        ->callAction(TestAction::make(CreateAction::class), data: [
+    Livewire::test(CreateDocument::class)
+        ->fillForm([
             'user_id' => $author->id,
             'category_id' => $category->id,
             'school_type_id' => $schoolType->id,
@@ -88,12 +111,14 @@ it('creates and updates a document', function () {
             'topic' => 'Tema 1',
             'keywords' => 'kemija, biologija',
         ])
+        ->call('create')
+        ->assertHasNoFormErrors()
         ->assertNotified();
 
     $document = Document::query()->where('slug', 'novo-gradivo')->firstOrFail();
 
-    Livewire::test(ManageDocuments::class)
-        ->callAction(TestAction::make(EditAction::class)->table($document), data: [
+    Livewire::test(EditDocument::class, ['record' => $document->getRouteKey()])
+        ->fillForm([
             'user_id' => $author->id,
             'category_id' => $category->id,
             'school_type_id' => $schoolType->id,
@@ -105,10 +130,47 @@ it('creates and updates a document', function () {
             'topic' => 'Tema 2',
             'keywords' => 'matematika',
         ])
+        ->call('save')
+        ->assertHasNoFormErrors()
         ->assertNotified();
 
     expect($document->fresh()->title)->toBe('Posodobljeno gradivo');
     expect($document->fresh()->grade_id)->toBeNull();
+});
+
+it('shows document sub navigation pages for downloads, comments and ratings', function () {
+    $document = Document::factory()->create([
+        'title' => 'Relacijski test dokumenta',
+    ]);
+    $downloadRecord = DownloadRecord::factory()->create([
+        'document_id' => $document->id,
+    ]);
+    $comment = Comment::factory()->create([
+        'document_id' => $document->id,
+        'text' => 'Komentar za preverjanje relacije',
+    ]);
+    $rating = Rating::factory()->create([
+        'document_id' => $document->id,
+        'rating' => 5,
+    ]);
+
+    Livewire::test(ViewDocument::class, ['record' => $document->getRouteKey()])
+        ->assertOk()
+        ->assertSee('Relacijski test dokumenta')
+        ->assertSeeHtml('fi-page-has-sub-navigation')
+        ->assertSeeHtml('fi-page-has-sub-navigation-start');
+
+    Livewire::test(ManageDocumentDownloads::class, ['record' => $document->getRouteKey()])
+        ->assertOk()
+        ->assertCanSeeTableRecords([$downloadRecord]);
+
+    Livewire::test(ManageDocumentComments::class, ['record' => $document->getRouteKey()])
+        ->assertOk()
+        ->assertCanSeeTableRecords([$comment]);
+
+    Livewire::test(ManageDocumentRatings::class, ['record' => $document->getRouteKey()])
+        ->assertOk()
+        ->assertCanSeeTableRecords([$rating]);
 });
 
 it('creates and updates a report', function () {

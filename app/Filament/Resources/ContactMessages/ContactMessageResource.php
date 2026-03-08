@@ -10,15 +10,19 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\MarkdownEditor;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -56,50 +60,25 @@ class ContactMessageResource extends Resource
                     ->getStateUsing(fn (ContactMessage $record): bool => $record->isReplied()),
                 TextColumn::make('created_at')
                     ->label('Prejeto')
-                    ->dateTime('d.m.Y H:i')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                Filter::make('unanswered')
+                    ->label('Neodgovorjeno')
+                    ->query(fn (Builder $query): Builder => $query->whereNull('replied_at')),
+            ])
             ->recordActions([
-                ViewAction::make()
-                    ->modalHeading(fn (ContactMessage $record): string => $record->subject)
-                    ->schema([
-                        Section::make('Sporočilo')
-                            ->schema([
-                                TextEntry::make('name')->label('Ime'),
-                                TextEntry::make('email')->label('E-pošta'),
-                                TextEntry::make('subject')->label('Zadeva'),
-                                TextEntry::make('message')
-                                    ->label('Sporočilo')
-                                    ->prose()
-                                    ->columnSpanFull(),
-                                TextEntry::make('created_at')
-                                    ->label('Prejeto')
-                                    ->dateTime('d.m.Y H:i'),
-                            ]),
-                        Section::make('Odgovor')
-                            ->schema([
-                                TextEntry::make('reply_message')
-                                    ->label('Odgovor')
-                                    ->prose()
-                                    ->columnSpanFull(),
-                                TextEntry::make('repliedBy.name')
-                                    ->label('Odgovoril/a'),
-                                TextEntry::make('replied_at')
-                                    ->label('Odgovorjeno')
-                                    ->dateTime('d.m.Y H:i'),
-                            ])
-                            ->visible(fn (ContactMessage $record): bool => $record->isReplied()),
-                    ]),
+                ViewAction::make(),
                 Action::make('reply')
                     ->label('Odgovori')
                     ->icon(Heroicon::ChatBubbleLeftRight)
                     ->color('success')
                     ->visible(fn (ContactMessage $record): bool => ! $record->isReplied())
                     ->schema([
-                        Textarea::make('reply_message')
+                        MarkdownEditor::make('reply_message')
                             ->label('Odgovor')
-                            ->rows(5)
                             ->required(),
                     ])
                     ->action(function (array $data, ContactMessage $record): void {
@@ -122,6 +101,41 @@ class ContactMessageResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->schema([
+            Section::make('Sporočilo')
+                ->schema([
+                    TextEntry::make('name')->label('Ime'),
+                    TextEntry::make('email')->label('E-pošta'),
+                    TextEntry::make('subject')->label('Zadeva'),
+                    TextEntry::make('message')
+                        ->label('Sporočilo')
+                        ->prose()
+                        ->columnSpanFull(),
+                    TextEntry::make('created_at')
+                        ->label('Prejeto'),
+                ]),
+            Callout::make('Ni odgovora')
+                ->description('Na sporočilo ni bilo odgovora.')
+                ->info()
+                ->hidden(fn (ContactMessage $record): bool => $record->isReplied()),
+            Section::make('Odgovor')
+                ->schema([
+                    TextEntry::make('reply_message')
+                        ->label('Odgovor')
+                        ->prose()
+                        ->columnSpanFull(),
+                    TextEntry::make('repliedBy.name')
+                        ->label('Odgovoril/a'),
+                    TextEntry::make('replied_at')
+                        ->label('Odgovorjeno')
+                        ->dateTime('d.m.Y H:i'),
+                ])
+                ->visible(fn (ContactMessage $record): bool => $record->isReplied()),
+        ]);
     }
 
     public static function getPages(): array

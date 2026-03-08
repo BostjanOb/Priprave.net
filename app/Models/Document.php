@@ -86,6 +86,11 @@ class Document extends Model
         return $this->hasMany(DocumentFile::class);
     }
 
+    public function downloadRecords(): HasMany
+    {
+        return $this->hasMany(DownloadRecord::class);
+    }
+
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);

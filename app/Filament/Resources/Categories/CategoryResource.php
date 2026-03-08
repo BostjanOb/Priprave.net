@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -51,11 +52,6 @@ class CategoryResource extends Resource
                     ->label('Slug')
                     ->required()
                     ->maxLength(255),
-                TextInput::make('sort_order')
-                    ->label('Vrstni red')
-                    ->numeric()
-                    ->minValue(0)
-                    ->required(),
             ]);
     }
 
@@ -63,9 +59,6 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label('Vrstni red')
-                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Naziv')
                     ->searchable()
@@ -79,7 +72,9 @@ class CategoryResource extends Resource
             ])
             ->defaultSort('sort_order')
             ->filters([
-                //
+                SelectFilter::make('parent_id')
+                    ->label('Nadrejena kategorija')
+                    ->relationship('parent', 'name'),
             ])
             ->recordActions([
                 EditAction::make(),

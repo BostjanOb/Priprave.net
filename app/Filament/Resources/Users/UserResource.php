@@ -5,12 +5,18 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ManageUserComments;
+use App\Filament\Resources\Users\Pages\ManageUserDownloadedDocuments;
+use App\Filament\Resources\Users\Pages\ManageUserRatings;
+use App\Filament\Resources\Users\Pages\ManageUserUploadedDocuments;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Resources\Users\Widgets\UserStatsOverview;
 use App\Models\User;
 use BackedEnum;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -45,11 +51,28 @@ class UserResource extends Resource
         return UsersTable::configure($table);
     }
 
-    public static function getRelations(): array
+    public static function getWidgets(): array
     {
         return [
-            //
+            UserStatsOverview::class,
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewUser::class,
+            EditUser::class,
+            ManageUserUploadedDocuments::class,
+            ManageUserDownloadedDocuments::class,
+            ManageUserComments::class,
+            ManageUserRatings::class,
+        ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
     }
 
     public static function getPages(): array
@@ -59,6 +82,10 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
+            'uploaded-documents' => ManageUserUploadedDocuments::route('/{record}/uploaded-documents'),
+            'downloaded-documents' => ManageUserDownloadedDocuments::route('/{record}/downloaded-documents'),
+            'comments' => ManageUserComments::route('/{record}/comments'),
+            'ratings' => ManageUserRatings::route('/{record}/ratings'),
         ];
     }
 }

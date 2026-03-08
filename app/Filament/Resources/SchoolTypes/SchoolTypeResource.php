@@ -46,11 +46,6 @@ class SchoolTypeResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
-                TextInput::make('sort_order')
-                    ->label('Vrstni red')
-                    ->numeric()
-                    ->minValue(0)
-                    ->required(),
             ]);
     }
 
@@ -58,9 +53,6 @@ class SchoolTypeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label('Vrstni red')
-                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Naziv')
                     ->searchable()
@@ -70,9 +62,6 @@ class SchoolTypeResource extends Resource
                     ->searchable(),
             ])
             ->defaultSort('sort_order')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
