@@ -19,10 +19,11 @@ class SyncBadgesCommand extends Command
     {
         progress(
             label: 'Syncing badges...',
-            steps: User::unless(
-                $this->option('all'),
-                fn (Builder $query) => $query->where('last_login_at', '>=', now()->subDays(30))
-            )->get(),
+            steps: User::with('badges')
+                ->unless(
+                    $this->option('all'),
+                    fn (Builder $query) => $query->where('last_login_at', '>=', now()->subDays(30))
+                )->get(),
             callback: fn (User $user) => $badgeService->syncBadges($user),
             hint: 'This may take some time.'
         );
