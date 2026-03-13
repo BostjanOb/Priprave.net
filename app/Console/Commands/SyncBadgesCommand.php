@@ -29,6 +29,7 @@ class SyncBadgesCommand extends Command
         }
 
         $bar = $this->output->createProgressBar($total);
+        $bar->setRedrawFrequency(500);
         $bar->start();
 
         $query->chunkById(100, function ($users) use ($badgeService, $bar): void {
