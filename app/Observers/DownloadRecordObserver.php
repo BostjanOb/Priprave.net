@@ -11,12 +11,10 @@ class DownloadRecordObserver
 
     public function created(DownloadRecord $downloadRecord): void
     {
-        // Award download badges to the downloader
         if ($downloadRecord->user) {
             $this->badgeService->checkDownloadBadges($downloadRecord->user);
         }
 
-        // Award navdih badge to the document author
         $author = $downloadRecord->document?->user;
         if ($author) {
             $this->badgeService->checkNavdihBadge($author);

@@ -49,14 +49,14 @@ class DocumentFile extends Model
         return $this->hasMany(DownloadRecord::class);
     }
 
-    public function url(): Attribute
+    protected function url(): Attribute
     {
         return Attribute::make(
             get: fn () => Storage::url($this->storage_path),
         );
     }
 
-    public function icon(): Attribute
+    protected function icon(): Attribute
     {
         return Attribute::make(
             get: fn () => match ($this->extension) {

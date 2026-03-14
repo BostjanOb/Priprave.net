@@ -183,10 +183,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->comments()->count();
     }
 
-    public function memberYears(): float|int
+    public function memberYears(): int
     {
         return $this->created_at
-            ? $this->created_at->diffInYears(now())
+            ? (int) $this->created_at->diffInYears(now())
             : 0;
     }
 

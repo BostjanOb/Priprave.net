@@ -23,10 +23,10 @@ class AdminDashboardMetricsService
             $activeUsersTrend = $this->getActiveUsersTrend();
 
             return [
-                'uploads_total' => Document::whereNull('deleted_at')->count(),
+                'uploads_total' => Document::count(),
                 'uploads_recent' => array_sum($uploadsTrend['data']),
                 'uploads_chart' => $uploadsTrend['data'],
-                'downloads_total' => (int) Document::whereNull('deleted_at')->sum('downloads_count'),
+                'downloads_total' => (int) Document::sum('downloads_count'),
                 'downloads_recent' => array_sum($downloadsTrend['data']),
                 'downloads_chart' => $downloadsTrend['data'],
                 'active_users_total' => $activeUsersTrend['total'],
@@ -43,8 +43,7 @@ class AdminDashboardMetricsService
     public function getUploadsTrend(): array
     {
         return $this->remember('uploads-trend', function (): array {
-            $rows = Document::whereNull('deleted_at')
-                ->whereBetween('created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
+            $rows = Document::whereBetween('created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
                 ->selectRaw('DATE(created_at) as date, COUNT(*) as aggregate')
                 ->groupByRaw('DATE(created_at)')
                 ->orderByRaw('DATE(created_at)')
@@ -105,11 +104,9 @@ class AdminDashboardMetricsService
     public function getContentHealth(): array
     {
         return $this->remember('content-health', function (): array {
-            $windowDocuments = Document::whereNull('deleted_at')
-                ->whereBetween('created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()]);
+            $windowDocuments = Document::whereBetween('created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()]);
 
-            $topSubject = Document::whereNull('documents.deleted_at')
-                ->whereBetween('documents.created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
+            $topSubject = Document::whereBetween('documents.created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
                 ->join('subjects', 'subjects.id', '=', 'documents.subject_id')
                 ->selectRaw('subjects.name as name, SUM(documents.downloads_count) as total_downloads')
                 ->groupBy('subjects.id', 'subjects.name')
@@ -117,8 +114,7 @@ class AdminDashboardMetricsService
                 ->orderBy('subjects.name')
                 ->first();
 
-            $topCategory = Document::whereNull('documents.deleted_at')
-                ->whereBetween('documents.created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
+            $topCategory = Document::whereBetween('documents.created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
                 ->join('categories', 'categories.id', '=', 'documents.category_id')
                 ->selectRaw('categories.name as name, SUM(documents.downloads_count) as total_downloads')
                 ->groupBy('categories.id', 'categories.name')

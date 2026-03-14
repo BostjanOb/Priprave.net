@@ -25,19 +25,14 @@ class BadgeService
     public function syncBadges(User $user): void
     {
         $earned = $this->computeEarnedBadges($user);
+        $existing = $user->badges->pluck('badge_id');
 
-        $existing = $user->badges->pluck('badge_id')->all();
-
-        $missing = array_diff(
-            array_map(fn (Badge $b) => $b->value, $earned),
-            array_map(fn ($b) => $b instanceof Badge ? $b->value : $b, $existing),
-        );
-
-        foreach ($missing as $badgeValue) {
-            $this->awardBadge($user, Badge::from($badgeValue));
+        foreach ($earned as $badge) {
+            if (! $existing->contains($badge)) {
+                $this->awardBadge($user, $badge);
+            }
         }
 
-        // Refresh the relationship so subsequent reads are up-to-date
         $user->unsetRelation('badges');
     }
 
@@ -60,14 +55,10 @@ class BadgeService
 
         // Downloads
         $downloadCount = $user->downloadCount();
-        if ($downloadCount >= 10) {
-            $earned[] = Badge::Raziskovalec;
-        }
-        if ($downloadCount >= 50) {
-            $earned[] = Badge::Zbiratelj;
-        }
-        if ($downloadCount >= 200) {
-            $earned[] = Badge::ModraSovica;
+        foreach (Badge::downloadMilestones() as $milestone) {
+            if ($downloadCount >= $milestone['threshold']) {
+                $earned[] = $milestone['badge'];
+            }
         }
 
         // Special
@@ -100,12 +91,10 @@ class BadgeService
             }
         }
 
-        // Also check vsestranski
         if ($user->distinctSubjectCount() >= 3) {
             $this->awardBadge($user, Badge::Vsestranski);
         }
 
-        // Check pioneer
         if ($user->isPioneer()) {
             $this->awardBadge($user, Badge::Pionir);
         }
@@ -118,14 +107,10 @@ class BadgeService
     {
         $downloadCount = $user->downloadCount();
 
-        if ($downloadCount >= 10) {
-            $this->awardBadge($user, Badge::Raziskovalec);
-        }
-        if ($downloadCount >= 50) {
-            $this->awardBadge($user, Badge::Zbiratelj);
-        }
-        if ($downloadCount >= 200) {
-            $this->awardBadge($user, Badge::ModraSovica);
+        foreach (Badge::downloadMilestones() as $milestone) {
+            if ($downloadCount >= $milestone['threshold']) {
+                $this->awardBadge($user, $milestone['badge']);
+            }
         }
     }
 

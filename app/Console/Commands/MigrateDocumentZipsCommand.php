@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\ResolvesSourceDirectory;
 use App\Models\Document;
 use App\Models\DocumentFile;
 use App\Support\Documents\DocumentZipPath;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -15,6 +15,8 @@ use Throwable;
 
 class MigrateDocumentZipsCommand extends Command
 {
+    use ResolvesSourceDirectory;
+
     protected $signature = 'app:migrate-document-zips
                             {path : Path to the legacy directory containing ZIP files}';
 
@@ -94,21 +96,6 @@ class MigrateDocumentZipsCommand extends Command
         $this->info("Failed {$failedCount} file(s).");
 
         return $failedCount > 0 ? self::FAILURE : self::SUCCESS;
-    }
-
-    private function resolveSourceDirectory(string $path): ?string
-    {
-        if (File::isDirectory($path)) {
-            return realpath($path) ?: $path;
-        }
-
-        $basePath = base_path($path);
-
-        if (File::isDirectory($basePath)) {
-            return realpath($basePath) ?: $basePath;
-        }
-
-        return null;
     }
 
     /**

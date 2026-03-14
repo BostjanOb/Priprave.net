@@ -28,12 +28,9 @@ class DocumentController extends Controller
 
         $document->incrementViews();
 
-        $isSaved = auth()->check() && auth()->user()->savedDocuments()->where('document_id', $document->id)->exists();
-
-        $userRating = null;
-        if (auth()->check()) {
-            $userRating = $document->ratings()->where('user_id', auth()->id())->value('rating');
-        }
+        $user = auth()->user();
+        $isSaved = $user && $user->savedDocuments()->where('document_id', $document->id)->exists();
+        $userRating = $user ? $document->ratings()->where('user_id', $user->id)->value('rating') : null;
 
         $relatedDocuments = $document->relatedDocuments(3)->load(['category', 'schoolType', 'grade', 'subject']);
 

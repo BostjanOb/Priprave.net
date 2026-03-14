@@ -231,6 +231,20 @@ enum Badge: string
     }
 
     /**
+     * Download milestones: badge => threshold download count.
+     *
+     * @return array<int, array{badge: Badge, threshold: int}>
+     */
+    public static function downloadMilestones(): array
+    {
+        return [
+            ['badge' => self::Raziskovalec, 'threshold' => 10],
+            ['badge' => self::Zbiratelj, 'threshold' => 50],
+            ['badge' => self::ModraSovica, 'threshold' => 200],
+        ];
+    }
+
+    /**
      * Contribution milestones: badge => threshold upload count.
      *
      * @return array<int, array{badge: Badge, threshold: int}>

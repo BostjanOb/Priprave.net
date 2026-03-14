@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\ResolvesSourceDirectory;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Http\File as HttpFile;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
 
 class ImportUserAvatarsCommand extends Command
 {
+    use ResolvesSourceDirectory;
+
     protected $signature = 'app:import-user-avatars {path : Path to a directory containing ID.png avatar files}';
 
     protected $description = 'Import user avatars from a directory of ID.png files';
@@ -62,21 +65,6 @@ class ImportUserAvatarsCommand extends Command
         $this->info("Skipped {$skippedCount} file(s).");
 
         return self::SUCCESS;
-    }
-
-    private function resolveSourceDirectory(string $path): ?string
-    {
-        if (File::isDirectory($path)) {
-            return realpath($path) ?: $path;
-        }
-
-        $basePath = base_path($path);
-
-        if (File::isDirectory($basePath)) {
-            return realpath($basePath) ?: $basePath;
-        }
-
-        return null;
     }
 
     private function isImportableAvatarFile(string $filename): bool
