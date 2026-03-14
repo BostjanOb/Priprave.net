@@ -13,7 +13,7 @@ class ManageUserDownloadedDocuments extends ManageRelatedRecords
 {
     protected static string $resource = UserResource::class;
 
-    protected static string $relationship = 'downloadRecords';
+    protected static string $relationship = 'downloadedDocuments';
 
     protected static ?string $title = 'Prenesena gradiva';
 
@@ -23,21 +23,21 @@ class ManageUserDownloadedDocuments extends ManageRelatedRecords
     {
         return $table
             ->columns([
-                TextColumn::make('document.title')
+                TextColumn::make('title')
                     ->label('Gradivo')
                     ->searchable()
                     ->sortable()
                     ->limit(60),
-                TextColumn::make('document.subject.name')
+                TextColumn::make('subject.name')
                     ->label('Predmet'),
-                TextColumn::make('document.category.name')
+                TextColumn::make('category.name')
                     ->label('Kategorija'),
-                TextColumn::make('created_at')
+                TextColumn::make('document_user.created_at')
                     ->label('Datum prenosa')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('document_user.created_at', 'desc')
             ->paginated([10, 25, 50]);
     }
 }

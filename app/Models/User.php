@@ -72,6 +72,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(DownloadRecord::class);
     }
 
+    public function downloadedDocuments(): BelongsToMany
+    {
+        return $this->belongsToMany(Document::class)->withPivot('created_at');
+    }
+
     public function savedDocuments(): BelongsToMany
     {
         return $this->belongsToMany(Document::class, 'saved_documents')->withTimestamps();
@@ -161,7 +166,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             return $this->download_records_count;
         }
 
-        return $this->downloadRecords()->count();
+        return (int) $this->downloads_count;
     }
 
     public function savedCount(): int

@@ -143,10 +143,52 @@ it('renders the browse page', function () {
     $this->get(route('browse'))->assertSuccessful();
 });
 
+it('formats browse totals with localized separators', function () {
+    app()->bind(BrowseSearchService::class, fn (): BrowseSearchService => new class implements BrowseSearchService
+    {
+        public function search(BrowseSearchInput $input): BrowseSearchResult
+        {
+            return new BrowseSearchResult(
+                documents: collect(),
+                totalHits: 1234,
+                totalPages: 83,
+                currentPage: 1,
+                facetCounts: [],
+            );
+        }
+    });
+
+    Livewire::test(BrowseDocuments::class)
+        ->assertSee('Išči med 1.234+ pripravami')
+        ->assertSee('1.234 rezultatov');
+});
+
 it('renders the browse page with stopnja query param', function () {
     SchoolType::factory()->create(['slug' => 'os']);
 
     $this->get(route('browse', ['stopnja' => 'os']))->assertSuccessful();
+});
+
+it('renders responsive browse pagination controls', function () {
+    $schoolType = SchoolType::factory()->create();
+    $grade = Grade::factory()->create(['school_type_id' => $schoolType->id]);
+    $subject = Subject::factory()->forSchoolType($schoolType)->create();
+    $category = Category::factory()->create();
+
+    Document::factory()->count(16)->create([
+        'user_id' => User::factory(),
+        'school_type_id' => $schoolType->id,
+        'grade_id' => $grade->id,
+        'subject_id' => $subject->id,
+        'category_id' => $category->id,
+    ]);
+
+    $this->get(route('browse'))
+        ->assertSuccessful()
+        ->assertSee('Nazaj')
+        ->assertSee('Naprej')
+        ->assertSee('class="flex gap-3 md:hidden"', false)
+        ->assertSee('class="hidden items-center justify-center gap-2 md:flex"', false);
 });
 
 it('uses alpine for subject filter search', function () {

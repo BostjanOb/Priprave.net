@@ -3,11 +3,12 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\User;
-use Filament\Infolists\Components\IconEntry;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class UserInfolist
 {
@@ -28,10 +29,24 @@ class UserInfolist
                         TextEntry::make('role')
                             ->label('Vloga')
                             ->badge(),
-                        IconEntry::make('email_verified_at')
+                        TextEntry::make('email_verified_at')
                             ->label('E-pošta potrjena')
-                            ->boolean()
-                            ->getStateUsing(fn (User $record): bool => filled($record->email_verified_at)),
+                            ->dateTime('d.m.Y H:i')
+                            ->placeholder('Ni potrjeno')
+                            ->hintAction(
+                                Action::make('confirmEmail')
+                                    ->label('Potrdi')
+                                    ->icon(Heroicon::OutlinedCheckBadge)
+                                    ->color('success')
+                                    ->requiresConfirmation()
+                                    ->modalHeading('Potrdi e-poštni naslov')
+                                    ->modalDescription('Ta uporabnik bo označen kot e-poštno potrjen.')
+                                    ->modalSubmitActionLabel('Potrdi e-pošto')
+                                    ->hidden(fn (User $record): bool => $record->hasVerifiedEmail())
+                                    ->action(function (User $record): void {
+                                        $record->markEmailAsVerified();
+                                    }),
+                            ),
                         TextEntry::make('last_login_at')
                             ->label('Zadnja prijava')
                             ->dateTime('d.m.Y H:i'),

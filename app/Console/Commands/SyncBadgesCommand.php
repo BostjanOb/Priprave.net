@@ -23,7 +23,6 @@ class SyncBadgesCommand extends Command
             label: 'Syncing badges...',
             steps: User::with('badges')
                 ->withCount([
-                    'downloadRecords',
                     'documents',
                     'comments',
                     'documents as distinct_subject_count' => fn ($q) => $q->select(DB::raw('count(distinct(subject_id))')),

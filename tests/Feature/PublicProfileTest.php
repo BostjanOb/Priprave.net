@@ -53,6 +53,19 @@ it('displays the member since date on the public profile', function () {
         ->assertSee('Član od');
 });
 
+it('renders the shared paginator on the public profile uploads tab', function () {
+    $user = User::factory()->create();
+
+    Document::factory()->count(6)->create(['user_id' => $user->id]);
+
+    $this->get(route('profile.show', $user))
+        ->assertSuccessful()
+        ->assertSee('Nazaj')
+        ->assertSee('Naprej')
+        ->assertSee('class="flex gap-3 md:hidden"', false)
+        ->assertSee('class="hidden items-center justify-center gap-2 md:flex"', false);
+});
+
 it('shows the upload count on the public profile', function () {
     $user = User::factory()->create();
     Document::factory()->count(3)->create(['user_id' => $user->id]);

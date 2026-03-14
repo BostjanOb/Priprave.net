@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Models\User;
@@ -8,6 +9,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -63,6 +66,69 @@ it('updates a user via table action', function () {
 
     expect($user->fresh()->display_name)->toBe('Novo Ime');
     expect($user->fresh()->role)->toBe('admin');
+});
+
+it('replaces a user avatar on the edit page', function () {
+    Storage::fake('public');
+
+    $oldAvatarPath = 'avatars/existing-avatar.jpg';
+    Storage::disk('public')->put($oldAvatarPath, 'old avatar');
+
+    $user = User::factory()->create([
+        'avatar_path' => $oldAvatarPath,
+    ]);
+
+    $component = Livewire::test(EditUser::class, ['record' => $user->getRouteKey()]);
+
+    $existingFileKey = array_key_first(
+        $component->instance()->callSchemaComponentMethod('form.avatar_path', 'getUploadedFiles')
+    );
+
+    $component
+        ->call('callSchemaComponentMethod', 'form.avatar_path', 'deleteUploadedFile', ['fileKey' => $existingFileKey])
+        ->set('data.avatar_path.replacement', UploadedFile::fake()->image('new-avatar.jpg', 200, 200))
+        ->set('data.password', '')
+        ->set('data.password_confirmation', '')
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    $user->refresh();
+
+    expect($user->avatar_path)->not->toBe($oldAvatarPath)
+        ->and($user->avatar_path)->toStartWith('avatars/');
+
+    Storage::disk('public')->assertMissing($oldAvatarPath);
+    Storage::disk('public')->assertExists($user->avatar_path);
+});
+
+it('removes a user avatar on the edit page', function () {
+    Storage::fake('public');
+
+    $avatarPath = 'avatars/existing-avatar.jpg';
+    Storage::disk('public')->put($avatarPath, 'old avatar');
+
+    $user = User::factory()->create([
+        'avatar_path' => $avatarPath,
+    ]);
+
+    $component = Livewire::test(EditUser::class, ['record' => $user->getRouteKey()]);
+
+    $existingFileKey = array_key_first(
+        $component->instance()->callSchemaComponentMethod('form.avatar_path', 'getUploadedFiles')
+    );
+
+    $component
+        ->call('callSchemaComponentMethod', 'form.avatar_path', 'deleteUploadedFile', ['fileKey' => $existingFileKey])
+        ->set('data.password', '')
+        ->set('data.password_confirmation', '')
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect($user->fresh()->avatar_path)->toBeNull();
+
+    Storage::disk('public')->assertMissing($avatarPath);
 });
 
 it('shows user infolist on the view page', function () {

@@ -8,7 +8,7 @@
     $stats = [
         [
             'label' => 'Učnih priprav',
-            'value' => number_format($documentCount, 0, ',', '.'),
+            'value' => \Illuminate\Support\Number::format($documentCount),
             'iconBg' => 'bg-emerald-100 dark:bg-emerald-900/50',
             'iconColor' => 'text-emerald-600 dark:text-emerald-400',
             'borderColor' => 'border-emerald-200 dark:border-emerald-800',
@@ -18,7 +18,7 @@
         ],
         [
             'label' => 'Registriranih učiteljev',
-            'value' => number_format($userCount, 0, ',', '.'),
+            'value' => \Illuminate\Support\Number::format($userCount),
             'iconBg' => 'bg-sky-100 dark:bg-sky-900/50',
             'iconColor' => 'text-sky-600 dark:text-sky-400',
             'borderColor' => 'border-sky-200 dark:border-sky-800',
@@ -28,7 +28,7 @@
         ],
         [
             'label' => 'Prenosov',
-            'value' => number_format($downloadCount, 0, ',', '.') . '+',
+            'value' => \Illuminate\Support\Number::format($downloadCount) . '+',
             'iconBg' => 'bg-fuchsia-100 dark:bg-fuchsia-900/50',
             'iconColor' => 'text-fuchsia-600 dark:text-fuchsia-400',
             'borderColor' => 'border-fuchsia-200 dark:border-fuchsia-800',

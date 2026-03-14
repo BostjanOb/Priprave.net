@@ -18,6 +18,7 @@
     $nextBadge         = $progress['nextBadge'];
     $progressPercent   = $progress['progressPercent'];
     $uploadsToNext     = $progress['uploadsToNext'];
+    $progressWidth     = \Illuminate\Support\Number::withLocale('en', fn (): string => \Illuminate\Support\Number::format($progressPercent, precision: 1));
 
     $pripravaWord = function (int $n): string {
         if ($n === 1) { return 'priprava'; }
@@ -60,7 +61,7 @@
     {{-- Progress bar --}}
     <div class="mt-4 h-3 w-full overflow-hidden rounded-full bg-white/80 dark:bg-emerald-900/50">
         <div class="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-500"
-             style="width: {{ number_format($progressPercent, 1) }}%"></div>
+             style="width: {{ $progressWidth }}%"></div>
     </div>
 
     <div class="mt-2 flex items-center justify-between text-xs text-emerald-700/90 dark:text-emerald-300/90">

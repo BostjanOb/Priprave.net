@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Models\Document;
-use App\Models\DownloadRecord;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AdminDashboardMetricsService
@@ -63,10 +63,13 @@ class AdminDashboardMetricsService
     public function getDownloadsTrend(): array
     {
         return $this->remember('downloads-trend', function (): array {
-            $rows = DownloadRecord::whereBetween('created_at', [$this->getTrendStartDate(), $this->getTrendEndDate()])
-                ->selectRaw('DATE(created_at) as date, COUNT(*) as aggregate')
-                ->groupByRaw('DATE(created_at)')
-                ->orderByRaw('DATE(created_at)')
+            $rows = DB::table('download_daily_stats')
+                ->whereBetween('date', [
+                    $this->getTrendStartDate()->toDateString(),
+                    $this->getTrendEndDate()->toDateString(),
+                ])
+                ->select('date', 'download_count as aggregate')
+                ->orderBy('date')
                 ->get();
 
             return [

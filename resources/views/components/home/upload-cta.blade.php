@@ -56,7 +56,7 @@
                         $benefits = [
                             ['icon' => 'heart', 'text' => 'Pomagaj kolegom pri načrtovanju pouka', 'color' => 'text-rose-500', 'bg' => 'bg-rose-50 dark:bg-rose-950/50'],
                             ['icon' => 'star', 'text' => 'Gradi svojo učiteljsko prepoznavnost', 'color' => 'text-amber-500', 'bg' => 'bg-amber-50 dark:bg-amber-950/50'],
-                            ['icon' => 'users', 'text' => 'Postani del skupnosti ' . number_format($userCount, 0, ',', '.') . '+ učiteljev', 'color' => 'text-teal-600', 'bg' => 'bg-teal-50 dark:bg-teal-950/50'],
+                            ['icon' => 'users', 'text' => 'Postani del skupnosti ' . \Illuminate\Support\Number::format($userCount) . '+ učiteljev', 'color' => 'text-teal-600', 'bg' => 'bg-teal-50 dark:bg-teal-950/50'],
                         ];
                     @endphp
                     @foreach ($benefits as $benefit)

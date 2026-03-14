@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -87,6 +88,11 @@ it('shows overview stats with seeded totals', function () {
             'created_at' => now()->subDays(3),
         ]);
     }
+
+    DB::table('download_daily_stats')->insert([
+        'date' => now()->subDays(3)->toDateString(),
+        'download_count' => 7,
+    ]);
 
     Livewire::test(AdminOverviewStats::class)
         ->assertOk()

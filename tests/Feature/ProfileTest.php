@@ -1,10 +1,10 @@
 <?php
 
+use App\Enums\Badge;
 use App\Livewire\DownloadedDocumentsTab;
 use App\Livewire\SavedDocumentsTab;
 use App\Livewire\UploadedDocumentsTab;
 use App\Models\Document;
-use App\Models\DownloadRecord;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -29,6 +29,21 @@ it('shows the profile page to authenticated verified users', function () {
         ->assertSee($user->display_name)
         ->assertSee('Uredi profil')
         ->assertSee(route('profile.edit'));
+});
+
+it('formats badge progress width with a CSS-safe decimal separator', function () {
+    $progress = [
+        'uploadCount' => 2,
+        'previousMilestone' => 1,
+        'nextMilestone' => 5,
+        'nextBadge' => Badge::Prispevkar,
+        'progressPercent' => 25.0,
+        'uploadsToNext' => 3,
+    ];
+
+    $this->blade('<x-badge-progress :progress="$progress" />', ['progress' => $progress])
+        ->assertSee('style="width: 25.0%"', false)
+        ->assertDontSee('style="width: 25,0%"', false);
 });
 
 it('redirects unverified users away from the profile page', function () {
@@ -287,7 +302,7 @@ it('cannot delete another users document', function () {
 it('shows downloaded documents for the authenticated user', function () {
     $user = User::factory()->create();
     $doc = Document::factory()->create();
-    DownloadRecord::factory()->create(['user_id' => $user->id, 'document_id' => $doc->id]);
+    $user->downloadedDocuments()->attach($doc->id);
 
     Livewire::actingAs($user)
         ->test(DownloadedDocumentsTab::class)

@@ -3,6 +3,7 @@
 use App\Models\Comment;
 use App\Models\Document;
 use App\Models\DocumentFile;
+use App\Models\DownloadDailyStat;
 use App\Models\DownloadRecord;
 use App\Models\Rating;
 use App\Models\Report;
@@ -29,12 +30,16 @@ it('shows document metadata on the detail page', function () {
     $document = Document::factory()->create([
         'description' => 'Opis testnega dokumenta',
         'topic' => 'Testna tema',
+        'views_count' => 1234,
+        'downloads_count' => 5678,
     ]);
 
     $this->get(route('document.show', $document))
         ->assertSuccessful()
         ->assertSee('Opis testnega dokumenta')
-        ->assertSee('Testna tema');
+        ->assertSee('Testna tema')
+        ->assertSee('1.235 ogledov')
+        ->assertSee('5.678 prenosov');
 });
 
 it('shows author name on the document page', function () {
@@ -104,6 +109,21 @@ it('shows file listing on the document page', function () {
         ->assertSee('test-datoteka.pdf');
 });
 
+it('renders mobile-safe truncation markup for document files', function () {
+    $document = Document::factory()->create();
+
+    DocumentFile::factory()->create([
+        'document_id' => $document->id,
+        'original_name' => 'zelo-dolgo-ime-datoteke-za-preverjanje-truncation-na-mobilnih-napravah.pdf',
+    ]);
+
+    $this->get(route('document.show', $document))
+        ->assertSuccessful()
+        ->assertSeeHtml('class="min-w-0 space-y-6 lg:col-span-2"')
+        ->assertSeeHtml('class="group flex min-w-0 items-center gap-3 rounded-xl border border-border bg-background p-3 transition-all"')
+        ->assertSeeHtml('class="block truncate text-sm font-medium text-foreground"');
+});
+
 // ── Download file ────────────────────────────────────────────────────────────
 
 it('requires authentication to download a file', function () {
@@ -140,6 +160,11 @@ it('allows authenticated verified users to download a file', function () {
         ->and($downloadRecord->user_id)->toBe($user->id)
         ->and($downloadRecord->document_id)->toBe($document->id)
         ->and($downloadRecord->document_file_id)->toBe($file->id);
+
+    // Verify pivot and daily stats
+    expect($document->downloadedByUsers()->where('users.id', $user->id)->exists())->toBeTrue()
+        ->and($user->fresh()->downloads_count)->toBe(1)
+        ->and(DownloadDailyStat::where('date', now()->toDateString())->value('download_count'))->toBe(1);
 });
 
 it('returns 404 when downloading a file that does not belong to the document', function () {
@@ -189,6 +214,11 @@ it('allows authenticated verified users to download a ZIP', function () {
         ->and($downloadRecord->user_id)->toBe($user->id)
         ->and($downloadRecord->document_id)->toBe($document->id)
         ->and($downloadRecord->document_file_id)->toBeNull();
+
+    // Verify pivot and daily stats
+    expect($document->downloadedByUsers()->where('users.id', $user->id)->exists())->toBeTrue()
+        ->and($user->fresh()->downloads_count)->toBe(1)
+        ->and(DownloadDailyStat::where('date', now()->toDateString())->value('download_count'))->toBe(1);
 });
 
 it('returns 404 when downloading ZIP for document with no files', function () {

@@ -1,3 +1,6 @@
+<div>
+    <!-- Waste no more time arguing what a good man should be, be one. - Marcus Aurelius -->
+</div>
 @if ($paginator->hasPages())
     <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}">
         <div class="flex gap-3 md:hidden">
@@ -7,31 +10,25 @@
                     Nazaj
                 </span>
             @else
-                <button
-                    type="button"
-                    wire:click="previousPage('{{ $paginator->getPageName() }}')"
-                    x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                    wire:loading.attr="disabled"
+                <a
+                    href="{{ $paginator->previousPageUrl() }}"
+                    rel="prev"
                     class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-muted-foreground transition-all hover:border-teal-200 hover:text-foreground"
-                    aria-label="@lang('pagination.previous')"
                 >
                     <x-icon-regular.angle-left class="size-4" />
                     Nazaj
-                </button>
+                </a>
             @endif
 
             @if ($paginator->hasMorePages())
-                <button
-                    type="button"
-                    wire:click="nextPage('{{ $paginator->getPageName() }}')"
-                    x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                    wire:loading.attr="disabled"
+                <a
+                    href="{{ $paginator->nextPageUrl() }}"
+                    rel="next"
                     class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-muted-foreground transition-all hover:border-teal-200 hover:text-foreground"
-                    aria-label="@lang('pagination.next')"
                 >
                     Naprej
                     <x-icon-regular.angle-right class="size-4" />
-                </button>
+                </a>
             @else
                 <span class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-muted-foreground opacity-40">
                     Naprej
@@ -46,16 +43,14 @@
                     <x-icon-regular.angle-left class="size-4" />
                 </span>
             @else
-                <button
-                    type="button"
-                    wire:click="previousPage('{{ $paginator->getPageName() }}')"
-                    x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                    wire:loading.attr="disabled"
+                <a
+                    href="{{ $paginator->previousPageUrl() }}"
+                    rel="prev"
                     class="flex size-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-all hover:border-teal-200 hover:text-foreground"
                     aria-label="@lang('pagination.previous')"
                 >
                     <x-icon-regular.angle-left class="size-4" />
-                </button>
+                </a>
             @endif
 
             @foreach ($elements as $element)
@@ -70,31 +65,27 @@
                                 {{ $page }}
                             </span>
                         @else
-                            <button
-                                type="button"
-                                wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')"
-                                x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+                            <a
+                                href="{{ $url }}"
                                 class="flex size-10 items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-muted-foreground transition-all hover:border-teal-200 hover:text-foreground"
                                 aria-label="{{ __('Go to page :page', ['page' => $page]) }}"
                             >
                                 {{ $page }}
-                            </button>
+                            </a>
                         @endif
                     @endforeach
                 @endif
             @endforeach
 
             @if ($paginator->hasMorePages())
-                <button
-                    type="button"
-                    wire:click="nextPage('{{ $paginator->getPageName() }}')"
-                    x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                    wire:loading.attr="disabled"
+                <a
+                    href="{{ $paginator->nextPageUrl() }}"
+                    rel="next"
                     class="flex size-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-all hover:border-teal-200 hover:text-foreground"
                     aria-label="@lang('pagination.next')"
                 >
                     <x-icon-regular.angle-right class="size-4" />
-                </button>
+                </a>
             @else
                 <span class="flex size-10 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground opacity-40">
                     <x-icon-regular.angle-right class="size-4" />

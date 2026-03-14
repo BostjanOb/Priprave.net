@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Document;
 use App\Models\User;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -17,11 +16,9 @@ class DownloadedDocumentsTab extends Component
         /** @var User $user */
         $user = auth()->user();
 
-        $downloadedIds = $user->downloadRecords()->pluck('document_id');
-
-        $documents = Document::whereIn('id', $downloadedIds)
+        $documents = $user->downloadedDocuments()
             ->with(['schoolType', 'category', 'grade', 'subject', 'user'])
-            ->latest()
+            ->latest('document_user.created_at')
             ->paginate(10);
 
         return view('livewire.downloaded-documents-tab', [

@@ -111,6 +111,11 @@ class Document extends Model
         return $this->hasMany(Report::class);
     }
 
+    public function downloadedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withPivot('created_at');
+    }
+
     public function savedBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'saved_documents')->withTimestamps();
@@ -186,6 +191,12 @@ class Document extends Model
                 'user_id' => $userId,
                 'document_file_id' => $documentFile?->id,
             ]);
+
+            $this->downloadedByUsers()->syncWithoutDetaching([$userId]);
+
+            User::where('id', $userId)->increment('downloads_count');
+
+            DownloadDailyStat::incrementForToday();
         });
     }
 

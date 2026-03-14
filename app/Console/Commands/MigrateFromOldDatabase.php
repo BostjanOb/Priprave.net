@@ -67,6 +67,9 @@ class MigrateFromOldDatabase extends Command
             $this->info('Skipping logPrenos migration (--skip-downloads).');
         }
 
+        $this->populateDownloadDailyStats();
+        $this->populateUserDownloadsCounts();
+
         $this->info('Migration complete.');
 
         return self::SUCCESS;
@@ -79,6 +82,8 @@ class MigrateFromOldDatabase extends Command
         Schema::disableForeignKeyConstraints();
 
         foreach ([
+            'document_user',
+            'download_daily_stats',
             'download_records',
             'ratings',
             'comments',
@@ -91,7 +96,9 @@ class MigrateFromOldDatabase extends Command
             'school_types',
             'categories',
         ] as $table) {
-            DB::table($table)->truncate();
+            if (Schema::hasTable($table)) {
+                DB::table($table)->truncate();
+            }
         }
 
         Schema::enableForeignKeyConstraints();
@@ -638,9 +645,7 @@ class MigrateFromOldDatabase extends Command
         $total = DB::connection('mysql_old')->table('uporabnik_ima_priprava')->count();
         $this->info("Total records: {$total}");
 
-        $migrated = $this->canUseCrossDatabaseBulkInsert()
-            ? $this->migrateDownloadRecordsFromUserDocumentsWithCrossDatabaseInsert()
-            : $this->migrateDownloadRecordsFromUserDocumentsWithChunkedFallback();
+        $migrated = $this->migrateDownloadRecordsFromUserDocumentsWithCrossDatabaseInsert();
 
         $this->info("Download records (user-document): {$migrated} migrated.");
     }
@@ -656,11 +661,77 @@ class MigrateFromOldDatabase extends Command
         $total = DB::connection('mysql_old')->table('logPrenos')->count();
         $this->info("Total records: {$total}");
 
-        $migrated = $this->canUseCrossDatabaseBulkInsert()
-            ? $this->migrateDownloadRecordsFromLogWithCrossDatabaseInsert()
-            : $this->migrateDownloadRecordsFromLogWithChunkedFallback();
+        $migrated = $this->migrateDownloadRecordsFromLogWithCrossDatabaseInsert();
 
         $this->info("Download records (logPrenos): {$migrated} migrated.");
+    }
+
+    // -------------------------------------------------------------------------
+    // Step 11: Populate derived tables
+    // -------------------------------------------------------------------------
+
+    private function populateDownloadDailyStats(): void
+    {
+        $this->info('Populating download_daily_stats...');
+
+        if (! Schema::hasTable('download_daily_stats')) {
+            $this->warn('download_daily_stats table does not exist, skipping.');
+
+            return;
+        }
+
+        $isMysql = in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
+        $upsertClause = $isMysql
+            ? 'ON DUPLICATE KEY UPDATE `download_count` = VALUES(`download_count`)'
+            : 'ON CONFLICT(`date`) DO UPDATE SET `download_count` = excluded.`download_count`';
+
+        $count = DB::affectingStatement("
+            INSERT INTO `download_daily_stats` (`date`, `download_count`)
+            SELECT DATE(`created_at`), COUNT(*)
+            FROM `download_records`
+            GROUP BY DATE(`created_at`)
+            {$upsertClause}
+        ");
+
+        $this->info("download_daily_stats: {$count} rows populated.");
+    }
+
+    private function populateUserDownloadsCounts(): void
+    {
+        $this->info('Populating users.downloads_count...');
+
+        if (! Schema::hasColumn('users', 'downloads_count')) {
+            $this->warn('users.downloads_count column does not exist, skipping.');
+
+            return;
+        }
+
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement('
+                UPDATE `users`
+                INNER JOIN (
+                    SELECT `user_id`, COUNT(*) AS `cnt`
+                    FROM `download_records`
+                    GROUP BY `user_id`
+                ) AS `dr` ON `users`.`id` = `dr`.`user_id`
+                SET `users`.`downloads_count` = `dr`.`cnt`
+            ');
+        } else {
+            DB::statement('
+                UPDATE `users`
+                SET `downloads_count` = (
+                    SELECT COUNT(*)
+                    FROM `download_records`
+                    WHERE `download_records`.`user_id` = `users`.`id`
+                )
+                WHERE EXISTS (
+                    SELECT 1 FROM `download_records`
+                    WHERE `download_records`.`user_id` = `users`.`id`
+                )
+            ');
+        }
+
+        $this->info('users.downloads_count populated.');
     }
 
     private function recalculateDocumentRatings(): void
@@ -701,8 +772,8 @@ class MigrateFromOldDatabase extends Command
         $oldDb = DB::connection('mysql_old')->getDatabaseName();
 
         return DB::affectingStatement("
-            INSERT INTO `download_records` (`user_id`, `document_id`, `document_file_id`, `created_at`)
-            SELECT `uip`.`uporabnikId`, `uip`.`pripravaId`, NULL, `p`.`datum`
+            INSERT INTO `document_user` (`user_id`, `document_id`,  `created_at`)
+            SELECT `uip`.`uporabnikId`, `uip`.`pripravaId`, now()
             FROM `{$oldDb}`.`uporabnik_ima_priprava` AS `uip`
             INNER JOIN `{$oldDb}`.`priprava` AS `p` ON `p`.`pripravaId` = `uip`.`pripravaId`
             INNER JOIN `documents` AS `d` ON `d`.`id` = `uip`.`pripravaId`
@@ -738,101 +809,6 @@ class MigrateFromOldDatabase extends Command
             ) AS `single_document_files` ON `single_document_files`.`document_id` = `l`.`pripravaId`
             WHERE `l`.`uporabnikId` > 0
         ");
-    }
-
-    private function migrateDownloadRecordsFromUserDocumentsWithChunkedFallback(): int
-    {
-        $this->info('Using chunked fallback import for uporabnik_ima_priprava.');
-
-        $migrated = 0;
-
-        DB::connection('mysql_old')
-            ->table('uporabnik_ima_priprava as uip')
-            ->join('priprava as p', 'p.pripravaId', '=', 'uip.pripravaId')
-            ->select('uip.uporabnikId', 'uip.pripravaId', 'p.datum')
-            ->orderBy('uip.uporabnikId')
-            ->orderBy('uip.pripravaId')
-            ->chunk($this->chunk, function ($rows) use (&$migrated): void {
-                $existingDocumentIds = $this->existingDocumentIds(
-                    $rows->pluck('pripravaId')->unique()->all(),
-                );
-                $existingUserIds = $this->existingUserIds(
-                    $rows->pluck('uporabnikId')->unique()->all(),
-                );
-
-                $inserts = [];
-
-                foreach ($rows as $row) {
-                    if (! $row->uporabnikId
-                        || ! isset($existingDocumentIds[$row->pripravaId])
-                        || ! isset($existingUserIds[$row->uporabnikId])) {
-                        continue;
-                    }
-
-                    $inserts[] = [
-                        'user_id' => $row->uporabnikId,
-                        'document_id' => $row->pripravaId,
-                        'document_file_id' => null,
-                        'created_at' => $row->datum,
-                    ];
-                }
-
-                $this->insertDownloadRecords($inserts);
-                $migrated += count($inserts);
-            });
-
-        return $migrated;
-    }
-
-    private function migrateDownloadRecordsFromLogWithChunkedFallback(): int
-    {
-        $this->info('Using chunked fallback import for logPrenos.');
-
-        $migrated = 0;
-        $singleDocumentFileIds = $this->singleDocumentFileIds();
-
-        DB::connection('mysql_old')
-            ->table('logPrenos')
-            ->select('id', 'pripravaId', 'uporabnikId', 'cas', 'tip')
-            ->orderBy('id')
-            ->chunk($this->chunk, function ($rows) use (&$migrated, $singleDocumentFileIds): void {
-                $existingDocumentIds = $this->existingDocumentIds(
-                    $rows->pluck('pripravaId')->unique()->all(),
-                );
-                $existingUserIds = $this->existingUserIds(
-                    $rows->pluck('uporabnikId')->unique()->all(),
-                );
-
-                $inserts = [];
-
-                foreach ($rows as $row) {
-                    if (! $row->uporabnikId
-                        || ! isset($existingDocumentIds[$row->pripravaId])
-                        || ! isset($existingUserIds[$row->uporabnikId])) {
-                        continue;
-                    }
-
-                    $inserts[] = [
-                        'user_id' => $row->uporabnikId,
-                        'document_id' => $row->pripravaId,
-                        'document_file_id' => $row->tip === 'datoteka'
-                            ? ($singleDocumentFileIds[$row->pripravaId] ?? null)
-                            : null,
-                        'created_at' => $row->cas,
-                    ];
-                }
-
-                $this->insertDownloadRecords($inserts);
-                $migrated += count($inserts);
-            });
-
-        return $migrated;
-    }
-
-    private function canUseCrossDatabaseBulkInsert(): bool
-    {
-        return in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)
-            && in_array(DB::connection('mysql_old')->getDriverName(), ['mysql', 'mariadb'], true);
     }
 
     /**

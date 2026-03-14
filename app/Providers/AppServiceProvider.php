@@ -6,6 +6,7 @@ use App\Auth\LegacyMd5UserProvider;
 use App\Services\Browse\BrowseSearchService;
 use App\Services\Browse\MeilisearchBrowseSearchService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::unguard();
         Number::useLocale('sl');
+        Paginator::defaultView('pagination.default');
+        Paginator::defaultSimpleView('pagination.simple');
 
         Auth::provider('legacy-eloquent', function ($app, array $config) {
             return new LegacyMd5UserProvider($app['hash'], $config['model']);

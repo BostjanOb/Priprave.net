@@ -92,7 +92,7 @@
 
         <div class="grid gap-8 lg:grid-cols-3">
             {{-- ── Left / main column ── --}}
-            <div class="space-y-6 lg:col-span-2">
+            <div class="min-w-0 space-y-6 lg:col-span-2">
 
                 {{-- Title hero card --}}
                 <div class="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8">
@@ -149,11 +149,11 @@
                         </span>
                         <span class="flex items-center gap-1.5">
                             <x-icon-regular.eye class="size-4" />
-                            {{ number_format($document->views_count) }} ogledov
+                            {{ \Illuminate\Support\Number::format($document->views_count) }} ogledov
                         </span>
                         <span class="flex items-center gap-1.5">
                             <x-icon-regular.download class="size-4" />
-                            {{ number_format($document->downloads_count) }} prenosov
+                            {{ \Illuminate\Support\Number::format($document->downloads_count) }} prenosov
                         </span>
                     </div>
 
@@ -182,15 +182,17 @@
                         @foreach($document->files as $file)
                             @if(auth()->check())
                                 <a href="{{ route('document.download.file', [$document, $file]) }}"
-                                   class="group flex items-center gap-3 rounded-xl border border-border bg-background p-3 transition-all hover:border-sky-200 hover:shadow-sm active:scale-[0.98]">
+                                   class="group flex min-w-0 items-center gap-3 rounded-xl border border-border bg-background p-3 transition-all hover:border-sky-200 hover:shadow-sm active:scale-[0.98]">
                             @else
-                                <div class="group flex items-center gap-3 rounded-xl border border-border bg-background p-3 transition-all">
+                                <div class="group flex min-w-0 items-center gap-3 rounded-xl border border-border bg-background p-3 transition-all">
                             @endif
                                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl {{ $fileColor($file->extension) }}">
                                     <x-dynamic-component  :component="'icon-regular.' . $file->icon" class="size-5" />
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-foreground">{{ $file->original_name }}</p>
+                                    <flux:tooltip :content="$file->original_name" align="start" class="block min-w-0">
+                                        <p class="block truncate text-sm font-medium text-foreground">{{ $file->original_name }}</p>
+                                    </flux:tooltip>
                                     <p class="text-xs text-muted-foreground">{{ \Illuminate\Support\Number::fileSize($file->size_bytes ) }}</p>
                                 </div>
                                 <div class="flex shrink-0 items-center gap-2">
@@ -284,7 +286,7 @@
             </div>
 
             {{-- ── Right sidebar ── --}}
-            <div class="space-y-5">
+            <div class="min-w-0 space-y-5">
 
                 {{-- Primary action card (desktop only) --}}
                 <div class="hidden rounded-2xl border border-border bg-card p-5 lg:block">

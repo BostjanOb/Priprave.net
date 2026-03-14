@@ -34,7 +34,7 @@
         <div class="relative mx-auto max-w-6xl px-4 py-8 md:py-10">
             <div class="mb-2 inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 dark:border-teal-800 dark:bg-teal-950/50">
                 <x-icon-regular.magnifying-glass class="size-3.5 text-teal-500" />
-                <span class="text-xs font-semibold text-teal-700 dark:text-teal-300">Išči med {{ number_format($documents->total(), 0, ',', '.') }}+ pripravami</span>
+                <span class="text-xs font-semibold text-teal-700 dark:text-teal-300">Išči med {{ \Illuminate\Support\Number::format($documents->total()) }}+ pripravami</span>
             </div>
             <h1 class="font-serif text-2xl font-bold text-foreground md:text-3xl">
                 Brskanje po pripravah
@@ -222,11 +222,11 @@
                 {{-- Pagination --}}
                 @if($documents->hasPages())
                     <div class="mt-8">
-                        {{ $documents->links('pagination.browse') }}
+                        {{ $documents->links() }}
                     </div>
 
                     <p class="mt-3 text-center text-xs text-muted-foreground">
-                        Stran {{ $documents->currentPage() }} od {{ $documents->lastPage() }} &middot; Prikazanih {{ $documents->count() }} od {{ number_format($documents->total(), 0, ',', '.') }} rezultatov
+                        Stran {{ $documents->currentPage() }} od {{ $documents->lastPage() }} &middot; Prikazanih {{ $documents->count() }} od {{ \Illuminate\Support\Number::format($documents->total()) }} rezultatov
                     </p>
                 @endif
             </div>

@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class UserForm
@@ -37,14 +38,15 @@ class UserForm
                     ])
                     ->required()
                     ->native(false),
-                // TODO: change to file upload
-                TextInput::make('avatar_path')
-                    ->label('Pot do avatarja')
-                    ->maxLength(255),
-                // TODO: move to infolist button
-                DateTimePicker::make('email_verified_at')
-                    ->label('E-pošta potrjena')
-                    ->seconds(false),
+                FileUpload::make('avatar_path')
+                    ->label('Avatar')
+                    ->avatar()
+                    ->disk('public')
+                    ->directory('avatars')
+                    ->visibility('public')
+                    ->maxSize(2048)
+                    ->deletable()
+                    ->deleteUploadedFileUsing(static fn (string $file): bool => Storage::disk('public')->delete($file)),
                 Fieldset::make('Sprememba gesla')
                     ->columnSpanFull()
                     ->schema([

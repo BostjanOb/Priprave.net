@@ -59,6 +59,16 @@ it('displays the upload CTA section', function () {
         ->assertSee('Deli ga s kolegi!');
 });
 
+it('formats home number components with localized separators', function () {
+    $this->blade('<x-home.upload-cta :user-count="1234" />')
+        ->assertSee('Postani del skupnosti 1.234+ učiteljev');
+
+    $this->blade('<x-home.stats-section :document-count="1234" :user-count="5678" :download-count="9012" average-rating="4.8" />')
+        ->assertSee('1.234')
+        ->assertSee('5.678')
+        ->assertSee('9.012+');
+});
+
 it('displays the stats section', function () {
     SchoolType::factory()->count(3)->create();
     Document::factory()->count(3)->create();
