@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Badge;
 use App\Models\Document;
 use App\Models\DocumentFile;
+use App\Services\Documents\RelatedDocumentsSearchService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,10 @@ use ZipArchive;
 
 class DocumentController extends Controller
 {
+    public function __construct(
+        private RelatedDocumentsSearchService $relatedDocumentsSearchService,
+    ) {}
+
     public function show(Document $document): View
     {
         $document->load([
@@ -32,7 +37,7 @@ class DocumentController extends Controller
         $isSaved = $user && $user->savedDocuments()->where('document_id', $document->id)->exists();
         $userRating = $user ? $document->ratings()->where('user_id', $user->id)->value('rating') : null;
 
-        $relatedDocuments = $document->relatedDocuments(3)->load(['category', 'schoolType', 'grade', 'subject']);
+        $relatedDocuments = $this->relatedDocumentsSearchService->search($document, 3);
 
         // Author's highest contribution badge
         $authorBadge = $document->user

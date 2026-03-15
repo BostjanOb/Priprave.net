@@ -9,7 +9,9 @@ use App\Models\Rating;
 use App\Models\Report;
 use App\Models\ReportReason;
 use App\Models\User;
+use App\Services\Documents\RelatedDocumentsSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -107,6 +109,40 @@ it('shows file listing on the document page', function () {
     $this->get(route('document.show', $document))
         ->assertSuccessful()
         ->assertSee('test-datoteka.pdf');
+});
+
+it('shows related documents from the search service', function () {
+    $document = Document::factory()->create();
+
+    $databaseRelatedDocument = Document::factory()->create([
+        'title' => 'Povezan iz baze',
+        'school_type_id' => $document->school_type_id,
+        'grade_id' => $document->grade_id,
+        'subject_id' => $document->subject_id,
+        'category_id' => $document->category_id,
+    ]);
+
+    $searchRelatedDocument = Document::factory()->create([
+        'title' => 'Povezan iz iskalnika',
+    ]);
+
+    app()->bind(RelatedDocumentsSearchService::class, fn (): RelatedDocumentsSearchService => new class($searchRelatedDocument) implements RelatedDocumentsSearchService
+    {
+        public function __construct(
+            private Document $relatedDocument,
+        ) {}
+
+        public function search(Document $document, int $limit = 3): Collection
+        {
+            return collect([$this->relatedDocument]);
+        }
+    });
+
+    $this->get(route('document.show', $document))
+        ->assertSuccessful()
+        ->assertSee('Podobne priprave')
+        ->assertSee('Povezan iz iskalnika')
+        ->assertDontSee($databaseRelatedDocument->title);
 });
 
 it('renders mobile-safe truncation markup for document files', function () {
