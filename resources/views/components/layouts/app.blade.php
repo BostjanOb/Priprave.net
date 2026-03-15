@@ -13,9 +13,19 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=source-serif-4:400,600,700&display=swap" rel="stylesheet">
 
     {{ $head ?? '' }}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css'])
     @livewireStyles
     @fluxAppearance
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-561J6RV90M"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-561J6RV90M');
+    </script>
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
 
