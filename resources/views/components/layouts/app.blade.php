@@ -196,8 +196,7 @@
                         </span>
                     </a>
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
-                        Spletna stran z učnimi gradivi za predšolsko vzgojo, razredni
-                        pouk in nadaljnje šolanje.
+                        Spletna stran z učnimi gradivi za predšolsko vzgojo, osnovno in srednjo šolo.
                     </p>
                 </div>
 

@@ -149,7 +149,7 @@ class MigrateFromOldDatabase extends Command
             ['slug' => 'ucni-list', 'name' => 'Učni list', 'novaVrsta' => 1, 'sort' => 1],
             ['slug' => 'preverjanje-znanja', 'name' => 'Preverjanje znanja', 'novaVrsta' => 2, 'sort' => 2],
             ['slug' => 'test', 'name' => 'Test', 'novaVrsta' => 3, 'sort' => 3],
-            ['slug' => 'delovni-list', 'name' => 'Delovni list', 'novaVrsta' => 4, 'sort' => 4],
+            ['slug' => 'mesano-gradivo', 'name' => 'Mešano gradivo', 'novaVrsta' => 4, 'sort' => 4],
         ];
 
         foreach ($subcategories as $sub) {
