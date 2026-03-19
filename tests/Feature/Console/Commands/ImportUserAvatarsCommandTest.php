@@ -20,8 +20,8 @@ it('imports user avatars from a directory and replaces existing avatars', functi
     $sourceDirectory = createTempAvatarDirectory();
 
     try {
-        File::put("{$sourceDirectory}/{$user->id}.png", 'new avatar');
-        File::put("{$sourceDirectory}/{$missingUserId}.png", 'missing user');
+        createTestPngImage("{$sourceDirectory}/{$user->id}.png");
+        createTestPngImage("{$sourceDirectory}/{$missingUserId}.png");
         File::put("{$sourceDirectory}/invalid-name.png", 'invalid');
 
         $this->artisan('app:import-user-avatars', ['path' => $sourceDirectory])
@@ -54,4 +54,11 @@ function createTempAvatarDirectory(): string
     File::makeDirectory($directory, 0755, true);
 
     return $directory;
+}
+
+function createTestPngImage(string $path, int $width = 400, int $height = 300): void
+{
+    $image = imagecreatetruecolor($width, $height);
+    imagepng($image, $path);
+    imagedestroy($image);
 }

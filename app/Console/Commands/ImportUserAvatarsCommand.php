@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\ResizeAvatar;
 use App\Console\Commands\Concerns\ResolvesSourceDirectory;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -74,10 +75,19 @@ class ImportUserAvatarsCommand extends Command
 
     private function storeAvatar(string $sourcePath): string
     {
-        return Storage::disk('public')->putFileAs(
+        $tempPath = sys_get_temp_dir().'/'.Str::ulid().'.png';
+        copy($sourcePath, $tempPath);
+
+        ResizeAvatar::handle($tempPath);
+
+        $storedPath = Storage::disk('public')->putFileAs(
             'avatars',
-            new HttpFile($sourcePath),
+            new HttpFile($tempPath),
             Str::ulid().'.png',
         );
+
+        unlink($tempPath);
+
+        return $storedPath;
     }
 }

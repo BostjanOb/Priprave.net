@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\ResizeAvatar;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -23,6 +24,8 @@ new class extends Component
         if ($user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
         }
+
+        ResizeAvatar::handle($this->avatar->getRealPath());
 
         $path = $this->avatar->store('avatars', 'public');
 

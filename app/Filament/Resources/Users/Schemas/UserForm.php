@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Actions\ResizeAvatar;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class UserForm
 {
@@ -46,7 +49,16 @@ class UserForm
                     ->visibility('public')
                     ->maxSize(2048)
                     ->deletable()
-                    ->deleteUploadedFileUsing(static fn (string $file): bool => Storage::disk('public')->delete($file)),
+                    ->deleteUploadedFileUsing(static fn (string $file): bool => Storage::disk('public')->delete($file))
+                    ->saveUploadedFileUsing(static function (TemporaryUploadedFile $file): string {
+                        ResizeAvatar::handle($file->getRealPath());
+
+                        return Storage::disk('public')->putFileAs(
+                            'avatars',
+                            $file,
+                            Str::ulid().'.'.$file->getClientOriginalExtension(),
+                        );
+                    }),
                 Fieldset::make('Sprememba gesla')
                     ->columnSpanFull()
                     ->schema([
