@@ -6,10 +6,9 @@
     <x-home.hero-search :$documentCount />
     <x-home.category-cards :$schoolTypes />
 
-    <section>
+    <section class="mb-8">
         <style>
             .adprva { width: 300px; height: 250px; }
-            @media(min-width: 500px) { .adprva { width: 468px; height: 60px; } }
             @media(min-width: 800px) { .adprva { width: 728px; height: 90px; } }
             @media(min-width: 1024px) { .adprva { width: 970px; height: 250px; } }
         </style>
