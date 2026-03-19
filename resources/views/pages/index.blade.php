@@ -6,11 +6,17 @@
     <x-home.hero-search :$documentCount />
     <x-home.category-cards :$schoolTypes />
 
-    <div class="overflow-hidden mx-auto w-[300px] h-[250px] md:h-auto md:max-w-3xl lg:max-w-5xl mb-8 text-center">
+    <div class="mx-auto mb-8 text-center">
+        <style>
+            .adprva { width: 300px; height: 250px; }
+            @media(min-width: 500px) { .adprva { width: 468px; height: 60px; } }
+            @media(min-width: 800px) { .adprva { width: 728px; height: 90px; } }
+            @media(min-width: 1024px) { .adprva { width: 970px; height: 250px; } }
+        </style>
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7799323007690890"
                 crossorigin="anonymous"></script>
         <!-- priprave.net - prva stran -->
-        <ins class="adsbygoogle w-[300px] h-[250px] md:h-auto md:max-w-3xl lg:max-w-5xl"
+        <ins class="adsbygoogle adprva"
             style="display:block"
             data-ad-client="ca-pub-7799323007690890"
             data-ad-slot="0690119852"
