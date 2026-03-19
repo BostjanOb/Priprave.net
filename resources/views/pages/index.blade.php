@@ -6,11 +6,11 @@
     <x-home.hero-search :$documentCount />
     <x-home.category-cards :$schoolTypes />
 
-    <div class="overflow-hidden mx-auto w-[300px] h-[250px] md:h-auto md:max-w-3xl lg:max-w-5xl px-4 mb-8 text-center">
+    <div class="overflow-hidden mx-auto w-[300px] h-[250px] md:h-auto md:max-w-3xl lg:max-w-5xl mb-8 text-center">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7799323007690890"
                 crossorigin="anonymous"></script>
         <!-- priprave.net - prva stran -->
-        <ins class="adsbygoogle"
+        <ins class="adsbygoogle w-[300px] h-[250px] md:h-auto md:max-w-3xl lg:max-w-5xl"
             style="display:block"
             data-ad-client="ca-pub-7799323007690890"
             data-ad-slot="0690119852"
