@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SchoolType;
 use Illuminate\Support\Str;
 
 return [
@@ -113,5 +114,21 @@ return [
     */
 
     'prefix' => env('CACHE_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-cache-'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | This option controls which classes may be unserialized when retrieving
+    | cached data. Setting this to false prevents deserialization of any
+    | PHP objects, hardening cache security if your APP_KEY is leaked.
+    |
+    */
+
+    'serializable_classes' => [
+        Illuminate\Database\Eloquent\Collection::class,
+        SchoolType::class
+    ],
 
 ];
