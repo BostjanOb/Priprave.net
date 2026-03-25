@@ -77,7 +77,6 @@ class UserForm
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->dehydrated(false),
                     ]),
-
             ]);
     }
 }

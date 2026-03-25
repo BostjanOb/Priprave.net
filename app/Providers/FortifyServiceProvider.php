@@ -16,17 +16,11 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         Fortify::ignoreRoutes();
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Fortify::createUsersUsing(CreateNewUser::class);
@@ -42,13 +36,13 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::verifyEmailView(fn () => view('auth.verify-email'));
         Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
 
-        RateLimiter::for('login', function (Request $request) {
+        RateLimiter::for('login', function (Request $request): Limit {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
             return Limit::perMinutes(15, 5)->by($throttleKey);
         });
 
-        RateLimiter::for('two-factor', function (Request $request) {
+        RateLimiter::for('two-factor', function (Request $request): Limit {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
     }

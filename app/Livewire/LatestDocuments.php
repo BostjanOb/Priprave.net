@@ -35,7 +35,7 @@ class LatestDocuments extends Component
         $documents = Document::with(['user', 'schoolType', 'grade', 'subject', 'category'])
             ->when(
                 $this->activeType !== 'all',
-                fn ($q) => $q->whereHas('schoolType', fn ($q) => $q->where('slug', $this->activeType))
+                fn ($query) => $query->whereHas('schoolType', fn ($schoolTypeQuery) => $schoolTypeQuery->where('slug', $this->activeType))
             )->latest()->limit(10)->get();
 
         return view('livewire.latest-documents', [

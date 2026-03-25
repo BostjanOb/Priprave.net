@@ -94,9 +94,6 @@ class ReportResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

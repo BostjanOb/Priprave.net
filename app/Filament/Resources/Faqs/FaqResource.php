@@ -81,9 +81,6 @@ class FaqResource extends Resource
             ])
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

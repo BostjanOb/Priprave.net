@@ -68,9 +68,6 @@ class SubjectResource extends Resource
                     ->searchable(),
             ])
             ->defaultSort('name')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

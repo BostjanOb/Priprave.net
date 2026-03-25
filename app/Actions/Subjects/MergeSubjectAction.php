@@ -30,13 +30,11 @@ class MergeSubjectAction
                 ]);
             }
 
-            $lockedTargetSubject = Subject::query()
-                ->lockForUpdate()
+            $lockedTargetSubject = Subject::lockForUpdate()
                 ->findOrFail($targetSubject->getKey());
 
             /** @var Collection<int, Subject> $sourceSubjects */
-            $sourceSubjects = Subject::query()
-                ->whereKey($normalizedSourceSubjectIds->all())
+            $sourceSubjects = Subject::whereKey($normalizedSourceSubjectIds->all())
                 ->with('schoolTypes:id')
                 ->lockForUpdate()
                 ->get();

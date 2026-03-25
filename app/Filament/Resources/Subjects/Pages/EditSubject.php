@@ -21,13 +21,12 @@ class EditSubject extends EditRecord
             Action::make('merge')
                 ->label('Merge')
                 ->color('warning')
-                ->visible(fn (Subject $record): bool => Subject::query()->where('id', '!=', $record->getKey())->exists())
+                ->visible(fn (Subject $record): bool => Subject::where('id', '!=', $record->getKey())->exists())
                 ->schema([
                     Select::make('sourceSubjectIds')
                         ->label('Predmeti za združitev')
                         ->options(
-                            fn (Subject $record): array => Subject::query()
-                                ->where('id', '!=', $record->getKey())
+                            fn (Subject $record): array => Subject::where('id', '!=', $record->getKey())
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                                 ->all(),

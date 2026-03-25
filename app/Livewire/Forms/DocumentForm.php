@@ -40,6 +40,7 @@ class DocumentForm extends Form
     /** @var array<int, array{id: int, name: string, extension: string, size: int}> */
     public array $existingFiles = [];
 
+    /** @return array<string, array<int, mixed>> */
     protected function rules(): array
     {
         $allowedExtensions = implode(',', DocumentFile::ALLOWED_EXTENSIONS);

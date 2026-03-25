@@ -153,20 +153,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function uploadCount(): int
     {
-        if ($this->documents_count) {
-            return $this->documents_count;
-        }
-
-        return $this->documents()->count();
+        return $this->documents_count ?? $this->documents()->count();
     }
 
     public function downloadCount(): int
     {
-        if ($this->download_records_count) {
-            return $this->download_records_count;
-        }
-
-        return (int) $this->downloads_count;
+        return $this->download_records_count ?? (int) $this->downloads_count;
     }
 
     public function savedCount(): int
@@ -176,11 +168,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function commentCount(): int
     {
-        if ($this->comments_count) {
-            return $this->comments_count;
-        }
-
-        return $this->comments()->count();
+        return $this->comments_count ?? $this->comments()->count();
     }
 
     public function memberYears(): int
@@ -192,20 +180,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function distinctSubjectCount(): int
     {
-        if ($this->distinct_subject_count) {
-            return $this->distinct_subject_count;
-        }
-
-        return $this->documents()->distinct('subject_id')->count('subject_id');
+        return $this->distinct_subject_count ?? $this->documents()->distinct('subject_id')->count('subject_id');
     }
 
     public function maxDocumentDownloads(): int
     {
-        if ($this->documents_max_downloads_count) {
-            return $this->documents_max_downloads_count;
-        }
-
-        return (int) ($this->documents()->max('downloads_count') ?? 0);
+        return $this->documents_max_downloads_count ?? (int) ($this->documents()->max('downloads_count') ?? 0);
     }
 
     public function isPioneer(): bool

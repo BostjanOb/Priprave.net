@@ -166,7 +166,6 @@ class DocumentResource extends Resource
                         TextEntry::make('updated_at')
                             ->label('Posodobljeno')
                             ->dateTime('d.m.Y H:i'),
-
                         TextEntry::make('description')
                             ->label('Opis')
                             ->columnSpanFull(),
@@ -230,11 +229,6 @@ class DocumentResource extends Resource
                 ]),
             ])
             ->recordUrl(fn (Document $record): string => static::getUrl('view', ['record' => $record]));
-    }
-
-    public static function getRelations(): array
-    {
-        return [];
     }
 
     public static function getRecordSubNavigation(Page $page): array

@@ -40,7 +40,6 @@ class DocumentController extends Controller
 
         $relatedDocuments = $this->relatedDocumentsSearchService->search($document, 4);
 
-        // Author's highest contribution badge
         $authorBadge = $document->user
             ? Badge::highestContributionBadge($document->user->uploadCount())
             : null;

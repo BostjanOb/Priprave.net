@@ -43,9 +43,7 @@ class UserInfolist
                                     ->modalDescription('Ta uporabnik bo označen kot e-poštno potrjen.')
                                     ->modalSubmitActionLabel('Potrdi e-pošto')
                                     ->hidden(fn (User $record): bool => $record->hasVerifiedEmail())
-                                    ->action(function (User $record): void {
-                                        $record->markEmailAsVerified();
-                                    }),
+                                    ->action(fn (User $record) => $record->markEmailAsVerified()),
                             ),
                         TextEntry::make('last_login_at')
                             ->label('Zadnja prijava')

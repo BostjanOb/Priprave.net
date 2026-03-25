@@ -233,12 +233,7 @@ class BrowseDocuments extends Component
 
     private function isIndexableBrowsePage(): bool
     {
-        return $this->search === ''
-            && $this->schoolTypeSlug === null
-            && $this->gradeId === null
-            && $this->subjectId === null
-            && $this->categoryIds === []
-            && $this->getPage() === 1;
+        return ! $this->hasActiveFilters() && $this->getPage() === 1;
     }
 
     private function pageTitle(?SchoolType $schoolType): string

@@ -22,7 +22,6 @@ class LatestDocumentsTable extends TableWidget
     {
         return $table
             ->query(fn (): Builder => Document::with(['user', 'subject', 'category'])
-                ->whereNull('deleted_at')
                 ->latest()
                 ->limit(10))
             ->columns([

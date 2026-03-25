@@ -35,7 +35,6 @@ class UsersTable
                 IconColumn::make('email_verified_at')
                     ->label('E-pošta potrjena')
                     ->boolean()
-                    ->getStateUsing(fn (User $record): bool => filled($record->email_verified_at))
                     ->sortable(),
                 TextColumn::make('last_login_at')
                     ->label('Zadnja prijava')
@@ -47,9 +46,6 @@ class UsersTable
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->filters([
-                //
-            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

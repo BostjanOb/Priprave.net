@@ -214,6 +214,9 @@ class AdminDashboardMetricsService
             ->all();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function remember(string $suffix, callable $callback): array
     {
         return Cache::remember(

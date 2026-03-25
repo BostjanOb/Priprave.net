@@ -8,9 +8,6 @@ use App\Models\UserBadge;
 
 class BadgeService
 {
-    /**
-     * Award a single badge idempotently.
-     */
     public function awardBadge(User $user, Badge $badge): void
     {
         UserBadge::firstOrCreate(
@@ -19,9 +16,7 @@ class BadgeService
         );
     }
 
-    /**
-     * Compute all earned badges and persist any missing ones (never revoke).
-     */
+    /** Persist any missing earned badges (never revoke). */
     public function syncBadges(User $user): void
     {
         $earned = $this->computeEarnedBadges($user);
@@ -36,11 +31,7 @@ class BadgeService
         $user->unsetRelation('badges');
     }
 
-    /**
-     * Compute which badges a user has earned based on their activity.
-     *
-     * @return Badge[]
-     */
+    /** @return Badge[] */
     public function computeEarnedBadges(User $user): array
     {
         $earned = [];
@@ -78,9 +69,6 @@ class BadgeService
         return $earned;
     }
 
-    /**
-     * Check and award contribution badges after a document is created.
-     */
     public function checkContributionBadges(User $user): void
     {
         $uploadCount = $user->uploadCount();
@@ -100,9 +88,6 @@ class BadgeService
         }
     }
 
-    /**
-     * Check and award download badges after a download is recorded.
-     */
     public function checkDownloadBadges(User $user): void
     {
         $downloadCount = $user->downloadCount();
@@ -114,9 +99,6 @@ class BadgeService
         }
     }
 
-    /**
-     * Check and award the navdih badge to the document author.
-     */
     public function checkNavdihBadge(User $author): void
     {
         if ($author->maxDocumentDownloads() >= 100) {
@@ -124,9 +106,6 @@ class BadgeService
         }
     }
 
-    /**
-     * Check and award the pomocnik badge.
-     */
     public function checkCommentBadges(User $user): void
     {
         if ($user->commentCount() >= 10) {
@@ -134,11 +113,7 @@ class BadgeService
         }
     }
 
-    /**
-     * Return contribution progress data for the "Moj vpliv" card.
-     *
-     * @return array{uploadCount: int, nextBadge: Badge|null, uploadsToNext: int, previousMilestone: int, nextMilestone: int|null, progressPercent: float}
-     */
+    /** @return array{uploadCount: int, nextBadge: Badge|null, uploadsToNext: int, previousMilestone: int, nextMilestone: int|null, progressPercent: float} */
     public function getContributionProgress(User $user): array
     {
         $uploadCount = $user->uploadCount();

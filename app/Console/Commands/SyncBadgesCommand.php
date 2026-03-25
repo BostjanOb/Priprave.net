@@ -25,7 +25,7 @@ class SyncBadgesCommand extends Command
                 ->withCount([
                     'documents',
                     'comments',
-                    'documents as distinct_subject_count' => fn ($q) => $q->select(DB::raw('count(distinct(subject_id))')),
+                    'documents as distinct_subject_count' => fn (Builder $q) => $q->select(DB::raw('count(distinct(subject_id))')),
                 ])
                 ->withMax('documents', 'downloads_count')
                 ->unless(

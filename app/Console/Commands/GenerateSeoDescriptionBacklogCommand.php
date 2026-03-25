@@ -11,9 +11,6 @@ class GenerateSeoDescriptionBacklogCommand extends Command
 
     protected $description = 'Show the highest-priority documents missing SEO descriptions.';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $documents = Document::with(['schoolType', 'grade', 'subject', 'category'])
